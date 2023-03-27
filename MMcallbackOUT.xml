@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<voicemail>
+<!-- innovaphone Multiple Callback Outgoing Calls V1.00 KWA 2023 -->
+	<function define="PromptString">
+  		<assign out="$i" value="1" /> 
+  		<assign out="$c" value="" /> 
+  		<index value="$string" pos="$i" size="1" out="$c" /> 
+  		<lib-strlen string="$c" out="$len-c" /> 
+		<while cond="$len-c">
+				<assign out="$Promt" value="" /> 
+  				<lib-strcat string="$Promt" string2="$c" out-string="$ctrl" /> 
+  				<lib-strcat string="$ctrl" string2=".g711a" out-string="$filename" /> 
+  			<store-get root="" name="$filename" out-url="$ctrl" /> 
+  			<pbx-prompt url="$ctrl" barge-in="false" /> 
+  			<add value="$i" value2="1" out="$i" /> 
+  			<assign out="$c" value="" /> 
+  			<index value="$string" pos="$i" size="1" out="$c" /> 
+  			<lib-strlen string="$c" out="$len-c" /> 
+  		</while>
+	</function>
+    <function define="Main">
+	<pbx-getcallinfo out-cgpn="$cgpn" out-cdpn="$cdpn" out-leg2="$leg2"/>	
+	<event type="timer" name="vbguard">
+		 <pbx-disc/>
+  	</event>
+      <timer name="vbguard" sec="30" />
+ 	<store-getstat root="Caller/" name="$cdpn" out-error="$error"/>
+	<if cond="$error">
+		<store-cookie root="Caller/" name="$cdpn" value="$cgpn"/>
+		<pbx-xfer e164="$cdpn" />
+	</if>
+	<store-cookie root="Caller/" name="$cdpn" out="$CBR"/>
+	<switch var="$CBR">
+		<case equal="-">
+			<wait sec="1"/>
+			<store-cookie root="Caller/" name="$cdpn" value="$cgpn"/>
+			<pbx-xfer e164="$cdpn" />
+		</case>
+		<case equal="$cgpn">
+			<pbx-xfer e164="$cdpn" />
+		</case>
+	</switch>
+	<store-get root="" name="Track100.g711a" out-url="$ctrl" /> 
+	<pbx-prompt url="$ctrl" />
+	<assign out="$string" value="$CBR"/>
+	<call name="PromptString" /> 
+	<store-get root="" name="Track101.g711a" out-url="$ctrl" /> 
+	<pbx-prompt url="$ctrl" />
+	<store-get root="" name="silence.g711a" out-url="$ctrl" />
+	<pbx-prompt url="$ctrl" sec="2" />
+	<store-cookie root="Caller/" name="$cdpn" value="$cgpn"/> 
+	<pbx-xfer e164="$cdpn" />
+    </function>    
+</voicemail>

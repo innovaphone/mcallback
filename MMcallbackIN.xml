@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<voicemail>
+<!-- innovaphone Multiple Callback Incomming Calls V1.00 KWA 2023 -->
+    <function define="Main">
+	<assign out="$Group" value="34" />
+	<assign out="$CBxml" value="58" />
+	<pbx-getcallinfo out-cgpn="$cgpn" out-leg2="$leg2"/>	
+	<store-getstat root="" name="Caller" out-error="$error"/>
+	<if cond="$error">
+		<store-mkdir root="" name="Caller"/> 
+	</if>
+	<store-cookie root="Caller/" name="$cgpn" value="-"/>
+	<lib-strcat string="$CBxml" string2="$cgpn" out-string="$NewNumber" />
+	<pbx-prepcallinfo cgpn="$NewNumber" />
+      <pbx-xfer e164="$Group" />
+   </function>    
+</voicemail>
